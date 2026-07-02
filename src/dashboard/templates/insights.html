@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Insights — Network Anomaly Detector{% endblock %}
+
+{% block content %}
+<h1>Interactive Insights</h1>
+<p class="subtitle">Diagnostic charts from the most recent training run.</p>
+
+{% if trained %}
+<section>
+  <h2>Confusion matrices</h2>
+  <div class="chart-row">
+    <figure><img src="{{ url_for('chart', name='cm_random_forest') }}" alt="Random Forest confusion matrix"><figcaption>Random Forest</figcaption></figure>
+    <figure><img src="{{ url_for('chart', name='cm_isolation_forest') }}" alt="Isolation Forest confusion matrix"><figcaption>Isolation Forest</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>ROC curve — Random Forest</h2>
+  <figure class="single"><img src="{{ url_for('chart', name='roc_random_forest') }}" alt="Random Forest ROC curve"></figure>
+</section>
+
+<section>
+  <h2>Feature importance</h2>
+  <figure class="single"><img src="{{ url_for('chart', name='feature_importance') }}" alt="Random Forest feature importance"></figure>
+</section>
+
+<section>
+  <h2>Attack type breakdown</h2>
+  <figure class="single"><img src="{{ url_for('chart', name='attack_breakdown') }}" alt="Attack type breakdown and detection rates"></figure>
+</section>
+{% endif %}
+{% endblock %}

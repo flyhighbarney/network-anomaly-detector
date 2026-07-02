@@ -1,0 +1,24 @@
+# Data (large, downloaded separately)
+data/raw/
+data/processed/
+
+# Trained artifacts and generated charts
+models/*.joblib
+models/*.json
+models/*.png
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Uploads
+src/dashboard/uploads/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

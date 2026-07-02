@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Network Anomaly Detector{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">◈</span>
+        <span class="brand-text">Anomaly<br>Detector</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('index') }}"
+               class="{{ 'active' if request.endpoint == 'index' else '' }}">Overview</a></li>
+        <li><a href="{{ url_for('predict') }}"
+               class="{{ 'active' if request.endpoint == 'predict' else '' }}">Predict</a></li>
+        <li><a href="{{ url_for('insights') }}"
+               class="{{ 'active' if request.endpoint == 'insights' else '' }}">Insights</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <p>CICIDS2017</p>
+        <p>RF + Isolation Forest</p>
+      </div>
+    </nav>
+
+    <main class="content">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flash">
+            {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% if trained is defined and not trained %}
+        <div class="notice">
+          <strong>No trained models found.</strong>
+          Run <code>python train.py</code> from the project root to generate
+          model artifacts, then reload this page.
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

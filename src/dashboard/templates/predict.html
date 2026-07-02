@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Predict — Network Anomaly Detector{% endblock %}
+
+{% block content %}
+<h1>Real-Time Prediction</h1>
+<p class="subtitle">Upload a CSV of network flows to classify each as benign or attack.</p>
+
+{% if trained %}
+<form class="upload-form" method="post" enctype="multipart/form-data">
+  <label for="file">Flow CSV file</label>
+  <input type="file" id="file" name="file" accept=".csv">
+  <button type="submit">Analyze</button>
+</form>
+<p class="hint">
+  The CSV must contain the base CICIDS2017 flow columns (column names are
+  normalized automatically). Derived features are computed on the server.
+</p>
+{% endif %}
+
+{% if result %}
+<section class="summary-bar">
+  <p>
+    <strong>{{ result.rf_flagged }}</strong> of <strong>{{ result.total }}</strong>
+    flows flagged as malicious by <em>Random Forest</em>;
+    <strong>{{ result.if_flagged }}</strong> flagged by <em>Isolation Forest</em>.
+  </p>
+  {% if filename %}<p class="hint">Source: {{ filename }}</p>{% endif %}
+</section>
+
+<section>
+  <table class="results">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Random Forest</th>
+        <th>Isolation Forest</th>
+        <th>Key features</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in result.rows %}
+      <tr>
+        <td class="mono">{{ row.index }}</td>
+        <td><span class="badge {{ 'attack' if row.rf == 'ATTACK' else 'benign' }}">{{ row.rf }}</span></td>
+        <td><span class="badge {{ 'attack' if row.if == 'ATTACK' else 'benign' }}">{{ row.if }}</span></td>
+        <td class="mono feat">
+          {%- for k, v in row.features.items() -%}
+            {{ k }}={{ v }}{% if not loop.last %} · {% endif %}
+          {%- endfor -%}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}
