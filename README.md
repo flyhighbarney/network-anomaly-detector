@@ -1,5 +1,10 @@
 # AI-Powered Network Anomaly Detection System
 
+**🔴 Live demo:** https://flyhighbarney.github.io/network-anomaly-detector/
+— a static export of the Overview and Insights pages with the real training
+results and native charts baked in. (Live CSV prediction on the Predict page
+needs the Python backend — run it locally, see [Setup](#setup).)
+
 An end-to-end machine-learning pipeline that ingests CICIDS2017 network-flow
 records, trains two complementary classifiers — a supervised **Random Forest**
 and an unsupervised **Isolation Forest** — to distinguish benign traffic from
