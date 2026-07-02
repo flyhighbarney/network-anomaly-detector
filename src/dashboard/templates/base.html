@@ -4,43 +4,58 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Network Anomaly Detector{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <div class="liquid-bg" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
   <div class="layout">
     <nav class="sidebar">
       <div class="brand">
         <span class="brand-mark">◈</span>
-        <span class="brand-text">Anomaly<br>Detector</span>
+        <span class="brand-text">Anomaly Detector<small>CICIDS2017 · Binary IDS</small></span>
       </div>
       <ul class="nav-links">
-        <li><a href="{{ url_for('index') }}"
-               class="{{ 'active' if request.endpoint == 'index' else '' }}">Overview</a></li>
-        <li><a href="{{ url_for('predict') }}"
-               class="{{ 'active' if request.endpoint == 'predict' else '' }}">Predict</a></li>
-        <li><a href="{{ url_for('insights') }}"
-               class="{{ 'active' if request.endpoint == 'insights' else '' }}">Insights</a></li>
+        <li><a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}"><span class="ico">▤</span> Overview</a></li>
+        <li><a href="{{ url_for('predict') }}" class="{{ 'active' if request.endpoint == 'predict' else '' }}"><span class="ico">◎</span> Predict</a></li>
+        <li><a href="{{ url_for('insights') }}" class="{{ 'active' if request.endpoint == 'insights' else '' }}"><span class="ico">◔</span> Insights</a></li>
       </ul>
       <div class="sidebar-footer">
-        <p>CICIDS2017</p>
-        <p>RF + Isolation Forest</p>
+        <p><span class="accent">▸</span> Random Forest</p>
+        <p><span class="accent">▸</span> Isolation Forest</p>
+        <p>StandardScaler · 18 features</p>
       </div>
     </nav>
 
     <main class="content">
+      <div class="topbar">
+        <span class="crumb">Network Anomaly Detector</span>
+        {% if trained is defined %}
+          {% if trained %}
+            <span class="chip ready pulse"><span class="dot"></span> Models ready</span>
+          {% else %}
+            <span class="chip warn"><span class="dot"></span> Not trained</span>
+          {% endif %}
+        {% endif %}
+      </div>
+
       {% with messages = get_flashed_messages() %}
         {% if messages %}
-          <div class="flash">
-            {% for message in messages %}<p>{{ message }}</p>{% endfor %}
-          </div>
+          <div class="flash">{% for message in messages %}<p>{{ message }}</p>{% endfor %}</div>
         {% endif %}
       {% endwith %}
 
       {% if trained is defined and not trained %}
         <div class="notice">
-          <strong>No trained models found.</strong>
-          Run <code>python train.py</code> from the project root to generate
-          model artifacts, then reload this page.
+          <p><strong>No trained models found.</strong> Run <code>python train.py</code>
+          from the project root to generate model artifacts, then reload this page.</p>
         </div>
       {% endif %}
 

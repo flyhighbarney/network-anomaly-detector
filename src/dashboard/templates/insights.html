@@ -1,32 +1,44 @@
 {% extends "base.html" %}
+{% from "_charts.html" import confusion, roc, importance_bars, attack_bars %}
 {% block title %}Insights — Network Anomaly Detector{% endblock %}
 
 {% block content %}
-<h1>Interactive Insights</h1>
-<p class="subtitle">Diagnostic charts from the most recent training run.</p>
+<header>
+  <h1>Interactive Insights</h1>
+  <p class="subtitle">Diagnostic charts rendered natively from the most recent training run.</p>
+</header>
 
-{% if trained %}
+{% if trained and metrics and metrics.charts %}
+{% set c = metrics.charts %}
 <section>
   <h2>Confusion matrices</h2>
   <div class="chart-row">
-    <figure><img src="{{ url_for('chart', name='cm_random_forest') }}" alt="Random Forest confusion matrix"><figcaption>Random Forest</figcaption></figure>
-    <figure><img src="{{ url_for('chart', name='cm_isolation_forest') }}" alt="Isolation Forest confusion matrix"><figcaption>Isolation Forest</figcaption></figure>
+    {{ confusion(c.confusion.random_forest, "Random Forest") }}
+    {{ confusion(c.confusion.isolation_forest, "Isolation Forest") }}
   </div>
 </section>
 
+{% if c.roc %}
 <section>
   <h2>ROC curve — Random Forest</h2>
-  <figure class="single"><img src="{{ url_for('chart', name='roc_random_forest') }}" alt="Random Forest ROC curve"></figure>
+  {{ roc(c.roc) }}
 </section>
+{% endif %}
 
+{% if c.feature_importance %}
 <section>
   <h2>Feature importance</h2>
-  <figure class="single"><img src="{{ url_for('chart', name='feature_importance') }}" alt="Random Forest feature importance"></figure>
+  <p class="subtitle">All 18 features ranked by Random Forest importance.</p>
+  {{ importance_bars(c.feature_importance) }}
 </section>
+{% endif %}
 
+{% if c.attack_breakdown %}
 <section>
   <h2>Attack type breakdown</h2>
-  <figure class="single"><img src="{{ url_for('chart', name='attack_breakdown') }}" alt="Attack type breakdown and detection rates"></figure>
+  <p class="subtitle">Test-set flow counts per attack type, with Random Forest per-type detection rate.</p>
+  {{ attack_bars(c.attack_breakdown) }}
 </section>
+{% endif %}
 {% endif %}
 {% endblock %}

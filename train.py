@@ -93,7 +93,19 @@ def run_random_forest(split: SplitData, skip_training: bool) -> dict:
             f"[train] WARNING: Random Forest macro F1 {metrics['f1_macro']:.4f} "
             "is below the 0.97 target. Check for feature/data issues."
         )
-    return metrics
+
+    # Structured chart data for the dashboard's native (in-browser) charts.
+    chart_data = {
+        "roc": evaluate.roc_curve_data(split.y_test, y_proba),
+        "feature_importance": evaluate.feature_importance_data(
+            model.feature_importances_, ALL_FEATURES
+        ),
+        "attack_breakdown": evaluate.attack_breakdown_data(
+            split.multiclass_test, y_pred
+        ),
+        "confusion": metrics["confusion_matrix"],
+    }
+    return metrics, chart_data
 
 
 def run_isolation_forest(split: SplitData, skip_training: bool) -> dict:
@@ -113,10 +125,10 @@ def run_isolation_forest(split: SplitData, skip_training: bool) -> dict:
     evaluate.plot_confusion_matrix(
         metrics["confusion_matrix"], "Isolation Forest", Paths.cm_isolation_forest
     )
-    return metrics
+    return metrics, {"confusion": metrics["confusion_matrix"]}
 
 
-def save_shared_artifacts(split: SplitData, all_metrics: dict) -> None:
+def save_shared_artifacts(split: SplitData, all_metrics: dict, charts: dict) -> None:
     """Persist the scaler, feature names, and dataset/metrics summary."""
     joblib.dump(split.scaler, Paths.scaler)
     print(f"[train] Saved scaler -> {Paths.scaler.name}")
@@ -139,6 +151,7 @@ def save_shared_artifacts(split: SplitData, all_metrics: dict) -> None:
             "attack_ratio": attack / total if total else 0.0,
         },
         "models": all_metrics,
+        "charts": charts,
     }
     Paths.metrics.write_text(json.dumps(summary, indent=2))
     print(f"[train] Saved metrics summary -> {Paths.metrics.name}")
@@ -152,12 +165,20 @@ def main() -> None:
     split = build_split(args.data_dir)
 
     all_metrics: dict = {}
+    charts: dict = {"confusion": {}}
     if args.model in ("rf", "both"):
-        all_metrics["random_forest"] = run_random_forest(split, args.skip_training)
+        metrics, rf_charts = run_random_forest(split, args.skip_training)
+        all_metrics["random_forest"] = metrics
+        charts["roc"] = rf_charts["roc"]
+        charts["feature_importance"] = rf_charts["feature_importance"]
+        charts["attack_breakdown"] = rf_charts["attack_breakdown"]
+        charts["confusion"]["random_forest"] = rf_charts["confusion"]
     if args.model in ("if", "both"):
-        all_metrics["isolation_forest"] = run_isolation_forest(split, args.skip_training)
+        metrics, if_charts = run_isolation_forest(split, args.skip_training)
+        all_metrics["isolation_forest"] = metrics
+        charts["confusion"]["isolation_forest"] = if_charts["confusion"]
 
-    save_shared_artifacts(split, all_metrics)
+    save_shared_artifacts(split, all_metrics, charts)
 
     metrics_list = [m for m in all_metrics.values()]
     if len(metrics_list) > 1:

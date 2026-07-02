@@ -1,0 +1,81 @@
+{# Native (in-browser) chart macros — inline SVG + CSS, no JS framework.
+   All macros consume the structured data saved to metrics.json["charts"]. #}
+
+{# ---- Confusion matrix as a live 2x2 grid ------------------------------- #}
+{% macro confusion(cm, title) %}
+{% set tn = cm[0][0] %}{% set fp = cm[0][1] %}{% set fn = cm[1][0] %}{% set tp = cm[1][1] %}
+{% set mx = [tn, fp, fn, tp]|max %}
+{% if mx == 0 %}{% set mx = 1 %}{% endif %}
+<figure class="glass chartcard">
+  <div class="cm">
+    <div class="cm-corner data-sm">n={{ '{:,}'.format(tn + fp + fn + tp) }}</div>
+    <div class="cm-colh data-sm">Pred · Benign</div>
+    <div class="cm-colh data-sm">Pred · Attack</div>
+    <div class="cm-rowh data-sm">Act · Benign</div>
+    <div class="cm-cell correct" style="--o:{{ (0.12 + 0.66 * (tn / mx))|round(3) }}"><span class="v">{{ '{:,}'.format(tn) }}</span><span class="k">True Neg</span></div>
+    <div class="cm-cell wrong" style="--o:{{ (0.12 + 0.66 * (fp / mx))|round(3) }}"><span class="v">{{ '{:,}'.format(fp) }}</span><span class="k">False Pos</span></div>
+    <div class="cm-rowh data-sm">Act · Attack</div>
+    <div class="cm-cell wrong" style="--o:{{ (0.12 + 0.66 * (fn / mx))|round(3) }}"><span class="v">{{ '{:,}'.format(fn) }}</span><span class="k">False Neg</span></div>
+    <div class="cm-cell correct" style="--o:{{ (0.12 + 0.66 * (tp / mx))|round(3) }}"><span class="v">{{ '{:,}'.format(tp) }}</span><span class="k">True Pos</span></div>
+  </div>
+  <figcaption>{{ title }}</figcaption>
+</figure>
+{% endmacro %}
+
+{# ---- ROC curve (stretched SVG, non-scaling strokes) -------------------- #}
+{% macro roc(r) %}
+{% set pts %}{% for i in range(r.fpr|length) %}{{ (r.fpr[i] * 100)|round(2) }},{{ (100 - r.tpr[i] * 100)|round(2) }} {% endfor %}{% endset %}
+<figure class="glass chartcard">
+  <div class="roc-plot">
+    <span class="axis-y data-sm">True Positive Rate</span>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="roc-svg" role="img" aria-label="ROC curve">
+      <defs>
+        <linearGradient id="rocfill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(137,210,225,0.40)"/>
+          <stop offset="100%" stop-color="rgba(137,210,225,0)"/>
+        </linearGradient>
+      </defs>
+      {% for g in [25, 50, 75] %}
+        <line x1="{{ g }}" y1="0" x2="{{ g }}" y2="100" class="roc-grid" vector-effect="non-scaling-stroke"/>
+        <line x1="0" y1="{{ g }}" x2="100" y2="{{ g }}" class="roc-grid" vector-effect="non-scaling-stroke"/>
+      {% endfor %}
+      <line x1="0" y1="100" x2="100" y2="0" class="roc-diag" vector-effect="non-scaling-stroke"/>
+      <polygon points="{{ pts }}100,100 0,100" fill="url(#rocfill)"/>
+      <polyline points="{{ pts }}" class="roc-line" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </div>
+  <div class="axis-x data-sm">False Positive Rate</div>
+  <figcaption>Random Forest ROC · <span class="good">AUC {{ '%.4f'|format(r.auc) }}</span></figcaption>
+</figure>
+{% endmacro %}
+
+{# ---- Horizontal bar chart (feature importance) ------------------------- #}
+{% macro importance_bars(items) %}
+{% set mx = items[0].importance if items else 1 %}
+{% if mx == 0 %}{% set mx = 1 %}{% endif %}
+<div class="glass chartcard bars">
+  {% for it in items %}
+  <div class="bar-row">
+    <span class="bar-label mono">{{ it.name }}</span>
+    <div class="bar-track"><span class="bar-fill" style="width:{{ (it.importance / mx * 100)|round(1) }}%"></span></div>
+    <span class="bar-val mono">{{ '%.3f'|format(it.importance) }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{# ---- Attack-type breakdown with detection-rate chips ------------------- #}
+{% macro attack_bars(items) %}
+{% set mx = items[0].count if items else 1 %}
+{% if mx == 0 %}{% set mx = 1 %}{% endif %}
+<div class="glass chartcard bars">
+  {% for it in items %}
+  <div class="bar-row">
+    <span class="bar-label mono">{{ it.type|replace('�', '-')|replace('  ', ' ') }}</span>
+    <div class="bar-track"><span class="bar-fill" style="width:{{ (it.count / mx * 100)|round(1) }}%"></span></div>
+    <span class="bar-val mono">{{ '{:,}'.format(it.count) }}</span>
+    <span class="rate {{ 'good' if it.detection_rate >= 0.9 else ('ok' if it.detection_rate >= 0.6 else 'bad') }}">{{ (it.detection_rate * 100)|round(1) }}%</span>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}

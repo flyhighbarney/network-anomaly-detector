@@ -196,6 +196,56 @@ def plot_attack_breakdown(
 # ---------------------------------------------------------------------------
 
 
+def _sample_curve(xs: np.ndarray, ys: np.ndarray, max_points: int = 140) -> tuple:
+    """Downsample paired arrays to at most ``max_points`` (keeping endpoints)."""
+    n = len(xs)
+    if n <= max_points:
+        idx = range(n)
+    else:
+        step = n / max_points
+        idx = sorted({int(i * step) for i in range(max_points)} | {0, n - 1})
+    return [round(float(xs[i]), 5) for i in idx], [round(float(ys[i]), 5) for i in idx]
+
+
+def roc_curve_data(y_true: np.ndarray, y_proba: np.ndarray) -> dict:
+    """Return sampled ROC-curve points and AUC for client-side rendering."""
+    fpr, tpr, _ = roc_curve(y_true, y_proba)
+    fx, tx = _sample_curve(fpr, tpr)
+    return {"fpr": fx, "tpr": tx, "auc": float(roc_auc_score(y_true, y_proba))}
+
+
+def feature_importance_data(importances: np.ndarray, feature_names: list) -> list:
+    """Return feature-importance pairs sorted descending."""
+    pairs = sorted(
+        zip(feature_names, importances), key=lambda p: p[1], reverse=True
+    )
+    return [{"name": n, "importance": round(float(v), 6)} for n, v in pairs]
+
+
+def attack_breakdown_data(
+    multiclass_test: pd.Series, y_pred: np.ndarray, top_n: int = 14
+) -> list:
+    """Return per-attack-type counts and detection rates (RF predictions)."""
+    df = pd.DataFrame({"type": multiclass_test.to_numpy(), "pred": y_pred})
+    attacks = df[df["type"] != "BENIGN"]
+    if attacks.empty:
+        return []
+    grouped = attacks.groupby("type").agg(
+        count=("pred", "size"), detected=("pred", "sum")
+    )
+    grouped["rate"] = grouped["detected"] / grouped["count"]
+    grouped = grouped.sort_values("count", ascending=False).head(top_n)
+    return [
+        {
+            "type": str(t),
+            "count": int(r["count"]),
+            "detected": int(r["detected"]),
+            "detection_rate": round(float(r["rate"]), 4),
+        }
+        for t, r in grouped.iterrows()
+    ]
+
+
 def print_comparison(metrics_list: list) -> None:
     """Print a side-by-side comparison table of model metrics to stdout."""
     headers = ["Metric"] + [m["model_name"] for m in metrics_list]

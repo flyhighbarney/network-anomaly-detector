@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_charts.html" import confusion %}
 {% block title %}Overview — Network Anomaly Detector{% endblock %}
 
 {% macro metric_class(value) -%}
@@ -14,28 +15,52 @@
 {%- endmacro %}
 
 {% block content %}
-<h1>Model Metrics Overview</h1>
-<p class="subtitle">Binary intrusion detection on CICIDS2017 network flows.</p>
+<header>
+  <h1>Model Metrics Overview</h1>
+  <p class="subtitle">Binary intrusion detection on CICIDS2017 network flows —
+  a supervised Random Forest paired with an unsupervised Isolation Forest baseline.</p>
+</header>
 
 {% if trained and metrics %}
   {% set ds = metrics.dataset %}
   <section class="stat-strip">
-    <div class="stat"><span class="stat-num">{{ '{:,}'.format(ds.total_records) }}</span><span class="stat-label">Total records</span></div>
-    <div class="stat"><span class="stat-num">{{ '{:,}'.format(ds.benign_count) }}</span><span class="stat-label">Benign</span></div>
-    <div class="stat"><span class="stat-num">{{ '{:,}'.format(ds.attack_count) }}</span><span class="stat-label">Attack</span></div>
-    <div class="stat"><span class="stat-num">{{ '%.2f'|format(ds.attack_ratio * 100) }}%</span><span class="stat-label">Attack ratio</span></div>
+    <div class="stat glass">
+      <span class="data-sm stat-label">Total records</span>
+      <span class="stat-num">{{ '{:,}'.format(ds.total_records) }}</span>
+      <div class="bar"><span style="width:100%"></span></div>
+    </div>
+    <div class="stat glass">
+      <span class="data-sm stat-label">Benign flows</span>
+      <span class="stat-num good">{{ '{:,}'.format(ds.benign_count) }}</span>
+      <div class="bar"><span style="width:{{ (100 - ds.attack_ratio * 100)|round(1) }}%"></span></div>
+    </div>
+    <div class="stat glass">
+      <span class="data-sm stat-label">Attack flows</span>
+      <span class="stat-num bad">{{ '{:,}'.format(ds.attack_count) }}</span>
+      <div class="bar"><span style="width:{{ (ds.attack_ratio * 100)|round(1) }}%"></span></div>
+    </div>
+    <div class="stat glass">
+      <span class="data-sm stat-label">Attack ratio</span>
+      <span class="stat-num">{{ '%.2f'|format(ds.attack_ratio * 100) }}%</span>
+      <div class="bar"><span style="width:{{ (ds.attack_ratio * 100)|round(1) }}%"></span></div>
+    </div>
   </section>
 
   <section class="cards">
     {% for key, m in metrics.models.items() %}
-    <div class="card">
-      <h2>{{ m.model_name }}</h2>
+    <div class="card glass">
+      <div class="card-head">
+        <h2>{{ m.model_name }}</h2>
+        <span class="chip {{ 'ready' if m.f1_macro >= 0.95 else 'warn' }}">
+          <span class="dot"></span> F1 {{ fmt(m.f1_macro) }}
+        </span>
+      </div>
       <dl class="metrics">
-        <dt>Accuracy</dt><dd class="mono {{ metric_class(m.accuracy) }}">{{ fmt(m.accuracy) }}</dd>
-        <dt>Precision</dt><dd class="mono {{ metric_class(m.precision) }}">{{ fmt(m.precision) }}</dd>
-        <dt>Recall</dt><dd class="mono {{ metric_class(m.recall) }}">{{ fmt(m.recall) }}</dd>
-        <dt>F1 (macro)</dt><dd class="mono {{ metric_class(m.f1_macro) }}">{{ fmt(m.f1_macro) }}</dd>
-        <dt>ROC-AUC</dt><dd class="mono {{ metric_class(m.roc_auc) }}">{{ fmt(m.roc_auc) }}</dd>
+        <dt>Accuracy</dt><dd class="{{ metric_class(m.accuracy) }}">{{ fmt(m.accuracy) }}</dd>
+        <dt>Precision</dt><dd class="{{ metric_class(m.precision) }}">{{ fmt(m.precision) }}</dd>
+        <dt>Recall</dt><dd class="{{ metric_class(m.recall) }}">{{ fmt(m.recall) }}</dd>
+        <dt>F1 (macro)</dt><dd class="{{ metric_class(m.f1_macro) }}">{{ fmt(m.f1_macro) }}</dd>
+        <dt>ROC-AUC</dt><dd class="{{ metric_class(m.roc_auc) }}">{{ fmt(m.roc_auc) }}</dd>
       </dl>
     </div>
     {% endfor %}
@@ -45,30 +70,33 @@
   {% if models|length > 1 %}
   <section>
     <h2>Best per metric</h2>
-    <table class="compare">
-      <thead><tr><th>Metric</th>{% for m in models %}<th>{{ m.model_name }}</th>{% endfor %}<th>Winner</th></tr></thead>
-      <tbody>
-        {% for label, field in [('Accuracy','accuracy'), ('Precision','precision'), ('Recall','recall'), ('F1 macro','f1_macro'), ('ROC-AUC','roc_auc')] %}
-        {% set vals = models|map(attribute=field)|list %}
-        {% set best = namespace(name='—', val=-1) %}
-        {% for m in models %}{% set v = m[field] %}{% if v is not none and v > best.val %}{% set best.val = v %}{% set best.name = m.model_name %}{% endif %}{% endfor %}
-        <tr>
-          <td>{{ label }}</td>
-          {% for m in models %}<td class="mono">{{ fmt(m[field]) }}</td>{% endfor %}
-          <td class="winner">{{ best.name }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="glass table-wrap">
+      <table class="compare">
+        <thead><tr><th>Metric</th>{% for m in models %}<th>{{ m.model_name }}</th>{% endfor %}<th>Winner</th></tr></thead>
+        <tbody>
+          {% for label, field in [('Accuracy','accuracy'), ('Precision','precision'), ('Recall','recall'), ('F1 macro','f1_macro'), ('ROC-AUC','roc_auc')] %}
+          {% set best = namespace(name='—', val=-1) %}
+          {% for m in models %}{% set v = m[field] %}{% if v is not none and v > best.val %}{% set best.val = v %}{% set best.name = m.model_name %}{% endif %}{% endfor %}
+          <tr>
+            <td>{{ label }}</td>
+            {% for m in models %}<td class="mono">{{ fmt(m[field]) }}</td>{% endfor %}
+            <td class="winner">{{ best.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
   {% endif %}
 
+  {% if metrics.charts and metrics.charts.confusion %}
   <section>
     <h2>Confusion matrices</h2>
     <div class="chart-row">
-      <figure><img src="{{ url_for('chart', name='cm_random_forest') }}" alt="Random Forest confusion matrix"><figcaption>Random Forest</figcaption></figure>
-      <figure><img src="{{ url_for('chart', name='cm_isolation_forest') }}" alt="Isolation Forest confusion matrix"><figcaption>Isolation Forest</figcaption></figure>
+      {{ confusion(metrics.charts.confusion.random_forest, "Random Forest") }}
+      {{ confusion(metrics.charts.confusion.isolation_forest, "Isolation Forest") }}
     </div>
   </section>
+  {% endif %}
 {% endif %}
 {% endblock %}

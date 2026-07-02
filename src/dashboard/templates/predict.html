@@ -2,56 +2,68 @@
 {% block title %}Predict — Network Anomaly Detector{% endblock %}
 
 {% block content %}
-<h1>Real-Time Prediction</h1>
-<p class="subtitle">Upload a CSV of network flows to classify each as benign or attack.</p>
+<header>
+  <h1>Real-Time Prediction</h1>
+  <p class="subtitle">Upload a CSV of network flows to classify each as benign or
+  attack. The saved feature pipeline and both models score every row.</p>
+</header>
+
+{% if config.STATIC_DEMO %}
+<div class="notice">
+  <p><strong>Static demo.</strong> Live CSV prediction runs on the Python backend and
+  is disabled on this hosted page. Clone the repo, run <code>python train.py</code>,
+  then <code>python run_dashboard.py</code> to score your own flows.</p>
+</div>
+{% endif %}
 
 {% if trained %}
-<form class="upload-form" method="post" enctype="multipart/form-data">
-  <label for="file">Flow CSV file</label>
-  <input type="file" id="file" name="file" accept=".csv">
-  <button type="submit">Analyze</button>
-</form>
-<p class="hint">
-  The CSV must contain the base CICIDS2017 flow columns (column names are
-  normalized automatically). Derived features are computed on the server.
-</p>
+<section>
+  <form class="upload-form glass" method="post" enctype="multipart/form-data">
+    <div class="drop">
+      <div class="upload-icon">⤒</div>
+      <h2>Upload Flow CSV</h2>
+      <p class="hint">Drop a CICIDS2017-style <code>.csv</code> here. Column names are
+      normalized automatically and the 3 derived features are computed server-side.</p>
+      <input type="file" id="file" name="file" accept=".csv" {{ 'disabled' if config.STATIC_DEMO }}>
+      <div><button type="submit" class="btn" {{ 'disabled' if config.STATIC_DEMO }}>Analyze Flows</button></div>
+    </div>
+  </form>
+</section>
 {% endif %}
 
 {% if result %}
-<section class="summary-bar">
-  <p>
-    <strong>{{ result.rf_flagged }}</strong> of <strong>{{ result.total }}</strong>
-    flows flagged as malicious by <em>Random Forest</em>;
-    <strong>{{ result.if_flagged }}</strong> flagged by <em>Isolation Forest</em>.
-  </p>
-  {% if filename %}<p class="hint">Source: {{ filename }}</p>{% endif %}
+<section>
+  <div class="summary-bar glass">
+    <div class="metric-pill"><span class="v rf">{{ result.rf_flagged }}</span><span class="l">RF · flagged attack</span></div>
+    <div class="divider"></div>
+    <div class="metric-pill"><span class="v if">{{ result.if_flagged }}</span><span class="l">Isolation Forest · flagged</span></div>
+    <div class="divider"></div>
+    <div class="metric-pill"><span class="v">{{ result.total }}</span><span class="l">Total flows scored</span></div>
+    {% if filename %}<div class="divider"></div><div class="metric-pill"><span class="l">Source</span><span class="mono" style="font-size:14px">{{ filename }}</span></div>{% endif %}
+  </div>
 </section>
 
 <section>
-  <table class="results">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Random Forest</th>
-        <th>Isolation Forest</th>
-        <th>Key features</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in result.rows %}
-      <tr>
-        <td class="mono">{{ row.index }}</td>
-        <td><span class="badge {{ 'attack' if row.rf == 'ATTACK' else 'benign' }}">{{ row.rf }}</span></td>
-        <td><span class="badge {{ 'attack' if row.if == 'ATTACK' else 'benign' }}">{{ row.if }}</span></td>
-        <td class="mono feat">
-          {%- for k, v in row.features.items() -%}
-            {{ k }}={{ v }}{% if not loop.last %} · {% endif %}
-          {%- endfor -%}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <h2>Per-flow results</h2>
+  <div class="glass table-wrap">
+    <table class="results">
+      <thead>
+        <tr><th>#</th><th>Random Forest</th><th>Isolation Forest</th><th>Key features</th></tr>
+      </thead>
+      <tbody>
+        {% for row in result.rows %}
+        <tr>
+          <td class="mono">{{ row.index }}</td>
+          <td><span class="badge {{ 'attack' if row.rf == 'ATTACK' else 'benign' }}">{{ row.rf }}</span></td>
+          <td><span class="badge {{ 'attack' if row.if == 'ATTACK' else 'benign' }}">{{ row.if }}</span></td>
+          <td class="feat">
+            {%- for k, v in row.features.items() -%}{{ k }}={{ v }}{% if not loop.last %} · {% endif %}{%- endfor -%}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview — Network Anomaly Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <div class="liquid-bg" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">◈</span>
+        <span class="brand-text">Anomaly Detector<small>CICIDS2017 · Binary IDS</small></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active"><span class="ico">▤</span> Overview</a></li>
+        <li><a href="predict.html" class=""><span class="ico">◎</span> Predict</a></li>
+        <li><a href="insights.html" class=""><span class="ico">◔</span> Insights</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <p><span class="accent">▸</span> Random Forest</p>
+        <p><span class="accent">▸</span> Isolation Forest</p>
+        <p>StandardScaler · 18 features</p>
+      </div>
+    </nav>
+
+    <main class="content">
+      <div class="topbar">
+        <span class="crumb">Network Anomaly Detector</span>
+        
+          
+            <span class="chip ready pulse"><span class="dot"></span> Models ready</span>
+          
+        
+      </div>
+
+      
+        
+      
+
+      
+
+      
+<header>
+  <h1>Model Metrics Overview</h1>
+  <p class="subtitle">Binary intrusion detection on CICIDS2017 network flows —
+  a supervised Random Forest paired with an unsupervised Isolation Forest baseline.</p>
+</header>
+
+
+  
+  <section class="stat-strip">
+    <div class="stat glass">
+      <span class="data-sm stat-label">Total records</span>
+      <span class="stat-num">2,522,362</span>
+      <div class="bar"><span style="width:100%"></span></div>
+    </div>
+    <div class="stat glass">
+      <span class="data-sm stat-label">Benign flows</span>
+      <span class="stat-num good">2,096,484</span>
+      <div class="bar"><span style="width:83.1%"></span></div>
+    </div>
+    <div class="stat glass">
+      <span class="data-sm stat-label">Attack flows</span>
+      <span class="stat-num bad">425,878</span>
+      <div class="bar"><span style="width:16.9%"></span></div>
+    </div>
+    <div class="stat glass">
+      <span class="data-sm stat-label">Attack ratio</span>
+      <span class="stat-num">16.88%</span>
+      <div class="bar"><span style="width:16.9%"></span></div>
+    </div>
+  </section>
+
+  <section class="cards">
+    
+    <div class="card glass">
+      <div class="card-head">
+        <h2>Random Forest</h2>
+        <span class="chip ready">
+          <span class="dot"></span> F1 0.9937
+        </span>
+      </div>
+      <dl class="metrics">
+        <dt>Accuracy</dt><dd class="good">0.9964</dd>
+        <dt>Precision</dt><dd class="good">0.9907</dd>
+        <dt>Recall</dt><dd class="good">0.9883</dd>
+        <dt>F1 (macro)</dt><dd class="good">0.9937</dd>
+        <dt>ROC-AUC</dt><dd class="good">0.9995</dd>
+      </dl>
+    </div>
+    
+    <div class="card glass">
+      <div class="card-head">
+        <h2>Isolation Forest</h2>
+        <span class="chip warn">
+          <span class="dot"></span> F1 0.6761
+        </span>
+      </div>
+      <dl class="metrics">
+        <dt>Accuracy</dt><dd class="bad">0.8183</dd>
+        <dt>Precision</dt><dd class="bad">0.4619</dd>
+        <dt>Recall</dt><dd class="bad">0.4612</dd>
+        <dt>F1 (macro)</dt><dd class="bad">0.6761</dd>
+        <dt>ROC-AUC</dt><dd class="na">n/a</dd>
+      </dl>
+    </div>
+    
+  </section>
+
+  
+  
+  <section>
+    <h2>Best per metric</h2>
+    <div class="glass table-wrap">
+      <table class="compare">
+        <thead><tr><th>Metric</th><th>Random Forest</th><th>Isolation Forest</th><th>Winner</th></tr></thead>
+        <tbody>
+          
+          
+          
+          <tr>
+            <td>Accuracy</td>
+            <td class="mono">0.9964</td><td class="mono">0.8183</td>
+            <td class="winner">Random Forest</td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td>Precision</td>
+            <td class="mono">0.9907</td><td class="mono">0.4619</td>
+            <td class="winner">Random Forest</td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td>Recall</td>
+            <td class="mono">0.9883</td><td class="mono">0.4612</td>
+            <td class="winner">Random Forest</td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td>F1 macro</td>
+            <td class="mono">0.9937</td><td class="mono">0.6761</td>
+            <td class="winner">Random Forest</td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td>ROC-AUC</td>
+            <td class="mono">0.9995</td><td class="mono">n/a</td>
+            <td class="winner">Random Forest</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </section>
+  
+
+  
+  <section>
+    <h2>Confusion matrices</h2>
+    <div class="chart-row">
+      
+
+
+
+<figure class="glass chartcard">
+  <div class="cm">
+    <div class="cm-corner data-sm">n=504,473</div>
+    <div class="cm-colh data-sm">Pred · Benign</div>
+    <div class="cm-colh data-sm">Pred · Attack</div>
+    <div class="cm-rowh data-sm">Act · Benign</div>
+    <div class="cm-cell correct" style="--o:0.78"><span class="v">418,504</span><span class="k">True Neg</span></div>
+    <div class="cm-cell wrong" style="--o:0.121"><span class="v">793</span><span class="k">False Pos</span></div>
+    <div class="cm-rowh data-sm">Act · Attack</div>
+    <div class="cm-cell wrong" style="--o:0.122"><span class="v">999</span><span class="k">False Neg</span></div>
+    <div class="cm-cell correct" style="--o:0.253"><span class="v">84,177</span><span class="k">True Pos</span></div>
+  </div>
+  <figcaption>Random Forest</figcaption>
+</figure>
+
+      
+
+
+
+<figure class="glass chartcard">
+  <div class="cm">
+    <div class="cm-corner data-sm">n=504,473</div>
+    <div class="cm-colh data-sm">Pred · Benign</div>
+    <div class="cm-colh data-sm">Pred · Attack</div>
+    <div class="cm-rowh data-sm">Act · Benign</div>
+    <div class="cm-cell correct" style="--o:0.78"><span class="v">373,544</span><span class="k">True Neg</span></div>
+    <div class="cm-cell wrong" style="--o:0.201"><span class="v">45,753</span><span class="k">False Pos</span></div>
+    <div class="cm-rowh data-sm">Act · Attack</div>
+    <div class="cm-cell wrong" style="--o:0.201"><span class="v">45,897</span><span class="k">False Neg</span></div>
+    <div class="cm-cell correct" style="--o:0.189"><span class="v">39,279</span><span class="k">True Pos</span></div>
+  </div>
+  <figcaption>Isolation Forest</figcaption>
+</figure>
+
+    </div>
+  </section>
+  
+
+
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predict — Network Anomaly Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <div class="liquid-bg" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">◈</span>
+        <span class="brand-text">Anomaly Detector<small>CICIDS2017 · Binary IDS</small></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html" class=""><span class="ico">▤</span> Overview</a></li>
+        <li><a href="predict.html" class="active"><span class="ico">◎</span> Predict</a></li>
+        <li><a href="insights.html" class=""><span class="ico">◔</span> Insights</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <p><span class="accent">▸</span> Random Forest</p>
+        <p><span class="accent">▸</span> Isolation Forest</p>
+        <p>StandardScaler · 18 features</p>
+      </div>
+    </nav>
+
+    <main class="content">
+      <div class="topbar">
+        <span class="crumb">Network Anomaly Detector</span>
+        
+          
+            <span class="chip ready pulse"><span class="dot"></span> Models ready</span>
+          
+        
+      </div>
+
+      
+        
+      
+
+      
+
+      
+<header>
+  <h1>Real-Time Prediction</h1>
+  <p class="subtitle">Upload a CSV of network flows to classify each as benign or
+  attack. The saved feature pipeline and both models score every row.</p>
+</header>
+
+
+<div class="notice">
+  <p><strong>Static demo.</strong> Live CSV prediction runs on the Python backend and
+  is disabled on this hosted page. Clone the repo, run <code>python train.py</code>,
+  then <code>python run_dashboard.py</code> to score your own flows.</p>
+</div>
+
+
+
+<section>
+  <form class="upload-form glass" method="post" enctype="multipart/form-data">
+    <div class="drop">
+      <div class="upload-icon">⤒</div>
+      <h2>Upload Flow CSV</h2>
+      <p class="hint">Drop a CICIDS2017-style <code>.csv</code> here. Column names are
+      normalized automatically and the 3 derived features are computed server-side.</p>
+      <input type="file" id="file" name="file" accept=".csv" disabled>
+      <div><button type="submit" class="btn" disabled>Analyze Flows</button></div>
+    </div>
+  </form>
+</section>
+
+
+
+
+    </main>
+  </div>
+</body>
+</html>
